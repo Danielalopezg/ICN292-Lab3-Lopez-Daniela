@@ -27,4 +27,3 @@
 4. Publicar el workflow de triage y el Error Workflow; en los workflows emisor y de pruebas, reemplazar la URL del webhook por la URL de producción propia.
 5. Ejecutar el emisor: la tabla de resultados muestra identificador, ruta y motivo de cada solicitud.
 
-Los `.json` no contienen pinData, contraseñas, tokens ni URL con credenciales.
