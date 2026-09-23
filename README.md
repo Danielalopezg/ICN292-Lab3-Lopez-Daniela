@@ -3,7 +3,7 @@
 - **Estudiante:** Daniela López García
 - **Rol:** 202360502-6
 - **RUT:** 27.518.225-7
-- **Semilla (tres últimos dígitos del RUT, sin dígito verificador):** S = 225 → U = $55.000 · D = 14 días
+- **Semilla:** S = 225 → U = $55.000  D = 14 días
 - **Paralelo:** 101
 - **Fecha:** 21-09-2026
 - **Repositorio:** https://github.com/Danielalopezg/ICN292-Lab3-Lopez-Daniela
