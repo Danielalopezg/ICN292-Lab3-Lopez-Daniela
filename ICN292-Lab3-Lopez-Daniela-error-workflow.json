@@ -1,0 +1,63 @@
+{
+  "name": "Lab3 - Error Workflow (alertas)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "23da0546-8f2f-4cf5-9f35-3b546fe0310d",
+      "name": "Error Trigger",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "danielalopez2502@gmail.com",
+        "subject": "=[ALERTA n8n] Fallo en {{ $json.workflow.name }}",
+        "emailType": "text",
+        "message": "=El workflow \"{{ $json.workflow.name }}\" fallo.\n\nNodo: {{ $json.execution.lastNodeExecuted }}\nError: {{ $json.execution.error.message }}\nEjecucion: {{ $json.execution.url }}\nFecha: {{ $now.setZone(\"America/Santiago\").toFormat(\"dd-MM-yyyy HH:mm\") }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "f3e6661d-3b01-476b-8c0d-0ffae38eb28a",
+      "name": "Avisar falla (Gmail)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        260,
+        300
+      ],
+      "webhookId": "81499804-a558-42d1-8a16-a2fab2191aa7",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "fYlh4xABrDZAxfrc",
+          "name": "Gmail account 5"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Avisar falla (Gmail)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "active": false,
+  "tags": []
+}

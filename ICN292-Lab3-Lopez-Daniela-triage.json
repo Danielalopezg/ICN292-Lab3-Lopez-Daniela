@@ -1,0 +1,944 @@
+{
+  "name": "Lab3 - Triage de devoluciones (S=225)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lab3-devoluciones-s25",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "d820d43f-e691-448a-8eac-7ba806b8c793",
+      "name": "Webhook Solicitudes",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        400
+      ],
+      "webhookId": "91d8f995-7abb-4c55-9b0b-f55ef301fedc"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.id_solicitud }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "empty",
+                      "singleValue": true
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "INVALIDO_CAMPO"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.monto.toNumber() }}",
+                    "rightValue": 0,
+                    "operator": {
+                      "type": "number",
+                      "operation": "lte"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "INVALIDO_MONTO"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.dias_desde_compra.toNumber() }}",
+                    "rightValue": 14,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gt"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "RECHAZO_PLAZO"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.estado_producto }}",
+                    "rightValue": "danado_por_uso",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "RECHAZO_ESTADO"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.monto.toNumber() }}",
+                    "rightValue": 55000,
+                    "operator": {
+                      "type": "number",
+                      "operation": "gt"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "REVISION_MONTO"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "combinator": "and",
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.estado_producto }}",
+                    "rightValue": "con_fallas",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ]
+              },
+              "renameOutput": true,
+              "outputKey": "REVISION_FALLA"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "APROBACION",
+          "allMatchingOutputs": false
+        }
+      },
+      "id": "5a75ff6a-7671-4521-8611-df7abe3998a6",
+      "name": "Triage (U=55000, D=14)",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        240,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f-id",
+              "name": "id_solicitud",
+              "value": "={{ $json.body.id_solicitud ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "f-sku",
+              "name": "sku",
+              "value": "={{ $json.body.sku ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "f-uni",
+              "name": "unidades",
+              "value": "={{ Number($json.body.unidades) }}",
+              "type": "number"
+            },
+            {
+              "id": "f-monto",
+              "name": "monto",
+              "value": "={{ Number($json.body.monto) }}",
+              "type": "number"
+            },
+            {
+              "id": "f-dias",
+              "name": "dias_desde_compra",
+              "value": "={{ Number($json.body.dias_desde_compra) }}",
+              "type": "number"
+            },
+            {
+              "id": "f-estado",
+              "name": "estado_producto",
+              "value": "={{ $json.body.estado_producto ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "f-email",
+              "name": "email_cliente",
+              "value": "={{ $json.body.email_cliente ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "f-u",
+              "name": "U",
+              "value": 55000,
+              "type": "number"
+            },
+            {
+              "id": "f-d",
+              "name": "D",
+              "value": 14,
+              "type": "number"
+            },
+            {
+              "id": "r-ruta",
+              "name": "ruta",
+              "value": "DATOS_INVALIDOS",
+              "type": "string"
+            },
+            {
+              "id": "r-causal",
+              "name": "causal",
+              "value": "={{ ($json.body.id_solicitud ?? \"\") === \"\" ? \"INVALIDO_CAMPO\" : \"INVALIDO_MONTO\" }}",
+              "type": "string"
+            },
+            {
+              "id": "r-motivo",
+              "name": "motivo",
+              "value": "={{ ($json.body.id_solicitud ?? \"\") === \"\" ? \"Falta el campo obligatorio id_solicitud\" : \"El monto informado (\" + $json.body.monto + \") no es mayor que cero\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "dd9060af-e4cf-417c-84e8-7a10b9911330",
+      "name": "Ruta DATOS_INVALIDOS",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        560,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f-id",
+              "name": "id_solicitud",
+              "value": "={{ $json.body.id_solicitud ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "f-sku",
+              "name": "sku",
+              "value": "={{ $json.body.sku ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "f-uni",
+              "name": "unidades",
+              "value": "={{ Number($json.body.unidades) }}",
+              "type": "number"
+            },
+            {
+              "id": "f-monto",
+              "name": "monto",
+              "value": "={{ Number($json.body.monto) }}",
+              "type": "number"
+            },
+            {
+              "id": "f-dias",
+              "name": "dias_desde_compra",
+              "value": "={{ Number($json.body.dias_desde_compra) }}",
+              "type": "number"
+            },
+            {
+              "id": "f-estado",
+              "name": "estado_producto",
+              "value": "={{ $json.body.estado_producto ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "f-email",
+              "name": "email_cliente",
+              "value": "={{ $json.body.email_cliente ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "f-u",
+              "name": "U",
+              "value": 55000,
+              "type": "number"
+            },
+            {
+              "id": "f-d",
+              "name": "D",
+              "value": 14,
+              "type": "number"
+            },
+            {
+              "id": "r-ruta",
+              "name": "ruta",
+              "value": "RECHAZO",
+              "type": "string"
+            },
+            {
+              "id": "r-causal",
+              "name": "causal",
+              "value": "={{ Number($json.body.dias_desde_compra) > 14 ? \"RECHAZO_PLAZO\" : \"RECHAZO_ESTADO\" }}",
+              "type": "string"
+            },
+            {
+              "id": "r-motivo",
+              "name": "motivo",
+              "value": "={{ Number($json.body.dias_desde_compra) > 14 ? \"Fuera de plazo: \" + $json.body.dias_desde_compra + \" dias desde la compra (maximo D = 14)\" : \"Producto danado por uso: no corresponde devolucion\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1cfe7aba-be9a-4191-b3e5-002b2412eb6a",
+      "name": "Ruta RECHAZO",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        560,
+        304
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f-id",
+              "name": "id_solicitud",
+              "value": "={{ $json.body.id_solicitud ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "f-sku",
+              "name": "sku",
+              "value": "={{ $json.body.sku ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "f-uni",
+              "name": "unidades",
+              "value": "={{ Number($json.body.unidades) }}",
+              "type": "number"
+            },
+            {
+              "id": "f-monto",
+              "name": "monto",
+              "value": "={{ Number($json.body.monto) }}",
+              "type": "number"
+            },
+            {
+              "id": "f-dias",
+              "name": "dias_desde_compra",
+              "value": "={{ Number($json.body.dias_desde_compra) }}",
+              "type": "number"
+            },
+            {
+              "id": "f-estado",
+              "name": "estado_producto",
+              "value": "={{ $json.body.estado_producto ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "f-email",
+              "name": "email_cliente",
+              "value": "={{ $json.body.email_cliente ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "f-u",
+              "name": "U",
+              "value": 55000,
+              "type": "number"
+            },
+            {
+              "id": "f-d",
+              "name": "D",
+              "value": 14,
+              "type": "number"
+            },
+            {
+              "id": "r-ruta",
+              "name": "ruta",
+              "value": "REVISION",
+              "type": "string"
+            },
+            {
+              "id": "r-causal",
+              "name": "causal",
+              "value": "={{ Number($json.body.monto) > 55000 ? \"REVISION_MONTO\" : \"REVISION_FALLA\" }}",
+              "type": "string"
+            },
+            {
+              "id": "r-motivo",
+              "name": "motivo",
+              "value": "={{ Number($json.body.monto) > 55000 ? \"Monto $\" + $json.body.monto + \" supera el umbral U = $55000: requiere revision manual\" : \"Producto reportado con fallas: requiere inspeccion tecnica\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1ff346c8-e9e3-4a74-9d8a-5ca709bcff19",
+      "name": "Ruta REVISION",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        560,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f-id",
+              "name": "id_solicitud",
+              "value": "={{ $json.body.id_solicitud ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "f-sku",
+              "name": "sku",
+              "value": "={{ $json.body.sku ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "f-uni",
+              "name": "unidades",
+              "value": "={{ Number($json.body.unidades) }}",
+              "type": "number"
+            },
+            {
+              "id": "f-monto",
+              "name": "monto",
+              "value": "={{ Number($json.body.monto) }}",
+              "type": "number"
+            },
+            {
+              "id": "f-dias",
+              "name": "dias_desde_compra",
+              "value": "={{ Number($json.body.dias_desde_compra) }}",
+              "type": "number"
+            },
+            {
+              "id": "f-estado",
+              "name": "estado_producto",
+              "value": "={{ $json.body.estado_producto ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "f-email",
+              "name": "email_cliente",
+              "value": "={{ $json.body.email_cliente ?? \"\" }}",
+              "type": "string"
+            },
+            {
+              "id": "f-u",
+              "name": "U",
+              "value": 55000,
+              "type": "number"
+            },
+            {
+              "id": "f-d",
+              "name": "D",
+              "value": 14,
+              "type": "number"
+            },
+            {
+              "id": "r-ruta",
+              "name": "ruta",
+              "value": "APROBACION",
+              "type": "string"
+            },
+            {
+              "id": "r-causal",
+              "name": "causal",
+              "value": "APROBACION",
+              "type": "string"
+            },
+            {
+              "id": "r-motivo",
+              "name": "motivo",
+              "value": "={{ \"Dentro de plazo (\" + $json.body.dias_desde_compra + \" <= 14 dias), monto $\" + $json.body.monto + \" <= U = $55000 y producto en estado apto: reembolso aprobado\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "44d66b2c-afd7-4cc7-b946-18a04481fa11",
+      "name": "Ruta APROBACION",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        560,
+        704
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://mindicador.cl/api",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "861be4ab-211e-44de-a6ce-6ab00880a404",
+      "name": "Consultar dolar (mindicador)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        528
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "7aaacce6-f52f-4d74-80d6-fa0e7a0ce9ea",
+      "name": "Unir clasificacion + dolar",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1120,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "g1",
+              "name": "id_solicitud",
+              "value": "={{ $json.id_solicitud }}",
+              "type": "string"
+            },
+            {
+              "id": "g2",
+              "name": "sku",
+              "value": "={{ $json.sku }}",
+              "type": "string"
+            },
+            {
+              "id": "g3",
+              "name": "unidades",
+              "value": "={{ $json.unidades }}",
+              "type": "number"
+            },
+            {
+              "id": "g4",
+              "name": "monto",
+              "value": "={{ $json.monto }}",
+              "type": "number"
+            },
+            {
+              "id": "g5",
+              "name": "dias_desde_compra",
+              "value": "={{ $json.dias_desde_compra }}",
+              "type": "number"
+            },
+            {
+              "id": "g6",
+              "name": "estado_producto",
+              "value": "={{ $json.estado_producto }}",
+              "type": "string"
+            },
+            {
+              "id": "g7",
+              "name": "email_cliente",
+              "value": "={{ $json.email_cliente }}",
+              "type": "string"
+            },
+            {
+              "id": "g8",
+              "name": "ruta",
+              "value": "={{ $json.ruta }}",
+              "type": "string"
+            },
+            {
+              "id": "g9",
+              "name": "causal",
+              "value": "={{ $json.causal }}",
+              "type": "string"
+            },
+            {
+              "id": "g10",
+              "name": "motivo",
+              "value": "={{ $json.motivo }}",
+              "type": "string"
+            },
+            {
+              "id": "g11",
+              "name": "U",
+              "value": "={{ $json.U }}",
+              "type": "number"
+            },
+            {
+              "id": "g12",
+              "name": "D",
+              "value": "={{ $json.D }}",
+              "type": "number"
+            },
+            {
+              "id": "g13",
+              "name": "dolar_clp",
+              "value": "={{ $json.dolar.valor }}",
+              "type": "number"
+            },
+            {
+              "id": "g14",
+              "name": "monto_usd",
+              "value": "={{ Math.round($json.monto / $json.dolar.valor * 100) / 100 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "788098e4-19a9-41f5-82e0-953dd2ee97ef",
+      "name": "Armar registro",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1360,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "IXBEmONhnMmPPg6S",
+          "cachedResultName": "registro_devoluciones"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {}
+        },
+        "options": {}
+      },
+      "id": "d76f5ad6-ce2b-4dbf-b099-6c588a775218",
+      "name": "Registrar solicitud",
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1600,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $(\"Armar registro\").item.json.email_cliente }}",
+        "subject": "=AndesHogar - Solicitud {{ $(\"Armar registro\").item.json.id_solicitud }}: {{ $(\"Armar registro\").item.json.ruta }}",
+        "emailType": "text",
+        "message": "=Hola,\n\nTu solicitud de devolucion {{ $(\"Armar registro\").item.json.id_solicitud }} (SKU {{ $(\"Armar registro\").item.json.sku }}, monto ${{ $(\"Armar registro\").item.json.monto }}, aprox. USD {{ $(\"Armar registro\").item.json.monto_usd }}) fue clasificada como: {{ $(\"Armar registro\").item.json.ruta }}.\n\nMotivo: {{ $(\"Armar registro\").item.json.motivo }}\n\nServicio al Cliente AndesHogar SpA",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "25856b4c-9bac-47ed-903a-641ad7630ddc",
+      "name": "Notificar cliente (Gmail)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1840,
+        400
+      ],
+      "webhookId": "38ba054d-7226-43bd-b317-ab4e38c3ad98",
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "fYlh4xABrDZAxfrc",
+          "name": "Gmail account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($(\"Armar registro\").item.json) }}",
+        "options": {}
+      },
+      "id": "c6c55e0d-6aaa-44f7-a833-0dde4e1eb328",
+      "name": "Responder al emisor",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2080,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Triage de devoluciones - AndesHogar\nS = 225  ->  U = 30000 + 1000*(225 mod 50) = **55000**  |  D = 7 + 7*(225 mod 4) = **14**\nReglas evaluadas en orden (primera coincidencia gana). Comparaciones inclusivas: monto = U aprueba, dias = D esta en plazo.",
+        "color": 4
+      },
+      "id": "35b61f4f-4263-4ead-9ef2-4ce37197b902",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        112,
+        304
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Solicitudes": {
+      "main": [
+        [
+          {
+            "node": "Triage (U=55000, D=14)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Triage (U=55000, D=14)": {
+      "main": [
+        [
+          {
+            "node": "Ruta DATOS_INVALIDOS",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ruta DATOS_INVALIDOS",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ruta RECHAZO",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ruta RECHAZO",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ruta REVISION",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ruta REVISION",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Ruta APROBACION",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ruta DATOS_INVALIDOS": {
+      "main": [
+        [
+          {
+            "node": "Unir clasificacion + dolar",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Consultar dolar (mindicador)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ruta RECHAZO": {
+      "main": [
+        [
+          {
+            "node": "Unir clasificacion + dolar",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Consultar dolar (mindicador)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ruta REVISION": {
+      "main": [
+        [
+          {
+            "node": "Unir clasificacion + dolar",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Consultar dolar (mindicador)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ruta APROBACION": {
+      "main": [
+        [
+          {
+            "node": "Unir clasificacion + dolar",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Consultar dolar (mindicador)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar dolar (mindicador)": {
+      "main": [
+        [
+          {
+            "node": "Unir clasificacion + dolar",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Unir clasificacion + dolar": {
+      "main": [
+        [
+          {
+            "node": "Armar registro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Armar registro": {
+      "main": [
+        [
+          {
+            "node": "Registrar solicitud",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar solicitud": {
+      "main": [
+        [
+          {
+            "node": "Notificar cliente (Gmail)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notificar cliente (Gmail)": {
+      "main": [
+        [
+          {
+            "node": "Responder al emisor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Santiago",
+    "errorWorkflow": "X923vAw04fZStLyU"
+  },
+  "active": false,
+  "tags": [],
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}

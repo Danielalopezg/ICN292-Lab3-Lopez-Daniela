@@ -1,0 +1,161 @@
+{
+  "name": "Lab3 - Pruebas Parte C",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "f254c932-d96f-4276-8a4b-7923f2f4b9bc",
+      "name": "Enviar pruebas",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const casos = [\n  { caso: \"C1a invalida: falta id_solicitud\", payload: {\"sku\": \"AU-210\", \"unidades\": \"1\", \"monto\": \"19990\", \"dias_desde_compra\": \"3\", \"estado_producto\": \"sin_abrir\", \"email_cliente\": \"prueba01@example.cl\"} },\n  { caso: \"C1b invalida: monto = 0\", payload: {\"id_solicitud\": \"DEV-P02\", \"sku\": \"AU-210\", \"unidades\": \"1\", \"monto\": \"0\", \"dias_desde_compra\": \"3\", \"estado_producto\": \"sin_abrir\", \"email_cliente\": \"prueba02@example.cl\"} },\n  { caso: \"C1c invalida: falta el campo monto (debe fallar un nodo)\", payload: {\"id_solicitud\": \"DEV-P03\", \"sku\": \"AU-210\", \"unidades\": \"1\", \"dias_desde_compra\": \"3\", \"estado_producto\": \"sin_abrir\", \"email_cliente\": \"prueba03@example.cl\"} },\n  { caso: \"C3a limite: monto = U = 55000\", payload: {\"id_solicitud\": \"DEV-P04\", \"sku\": \"TE-330\", \"unidades\": \"1\", \"monto\": \"55000\", \"dias_desde_compra\": \"3\", \"estado_producto\": \"sin_abrir\", \"email_cliente\": \"prueba04@example.cl\"} },\n  { caso: \"C3b limite: dias = D = 14\", payload: {\"id_solicitud\": \"DEV-P05\", \"sku\": \"TE-330\", \"unidades\": \"1\", \"monto\": \"30000\", \"dias_desde_compra\": \"14\", \"estado_producto\": \"sin_abrir\", \"email_cliente\": \"prueba05@example.cl\"} },\n  { caso: \"C5a monto = veinte mil\", payload: {\"id_solicitud\": \"DEV-P06\", \"sku\": \"AU-210\", \"unidades\": \"1\", \"monto\": \"veinte mil\", \"dias_desde_compra\": \"3\", \"estado_producto\": \"sin_abrir\", \"email_cliente\": \"prueba06@example.cl\"} },\n  { caso: \"C5b sku inexistente ZZ-999\", payload: {\"id_solicitud\": \"DEV-P07\", \"sku\": \"ZZ-999\", \"unidades\": \"1\", \"monto\": \"19990\", \"dias_desde_compra\": \"3\", \"estado_producto\": \"sin_abrir\", \"email_cliente\": \"prueba07@example.cl\"} }\n];\nreturn casos.map(c => ({ json: c }));"
+      },
+      "id": "f16c4342-d534-498b-a41a-bce2d17ccd07",
+      "name": "Casos de prueba Parte C",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://danielalopez.app.n8n.cloud/webhook/lab3-devoluciones-s25",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.payload) }}",
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 800
+            }
+          },
+          "response": {
+            "response": {
+              "neverError": true,
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "5880255b-d81a-48fb-8603-50e53ca6bda4",
+      "name": "POST al webhook de triage",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "p1",
+              "name": "caso",
+              "value": "={{ $(\"Casos de prueba Parte C\").item.json.caso }}",
+              "type": "string"
+            },
+            {
+              "id": "p2",
+              "name": "http_status",
+              "value": "={{ $json.statusCode }}",
+              "type": "number"
+            },
+            {
+              "id": "p3",
+              "name": "ruta",
+              "value": "={{ $json.body?.ruta ?? \"SIN RUTA (el flujo fallo)\" }}",
+              "type": "string"
+            },
+            {
+              "id": "p4",
+              "name": "detalle",
+              "value": "={{ $json.body?.motivo ?? JSON.stringify($json.body) }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "30ea874d-20e0-48b5-a6e5-f20735c2deaa",
+      "name": "Resultado de cada prueba",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        720,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Parte C - Casos borde\nEnvia al webhook de produccion las pruebas: 3 invalidas (una hace fallar el Switch), limites monto = U y dias = D, \"veinte mil\" y SKU ZZ-999.",
+        "color": 3
+      },
+      "id": "a3567381-8da2-4d27-a792-479d73952bbb",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        100,
+        100
+      ]
+    }
+  ],
+  "connections": {
+    "Enviar pruebas": {
+      "main": [
+        [
+          {
+            "node": "Casos de prueba Parte C",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Casos de prueba Parte C": {
+      "main": [
+        [
+          {
+            "node": "POST al webhook de triage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "POST al webhook de triage": {
+      "main": [
+        [
+          {
+            "node": "Resultado de cada prueba",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "active": false,
+  "tags": []
+}
